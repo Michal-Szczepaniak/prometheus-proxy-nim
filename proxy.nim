@@ -1,4 +1,4 @@
-import asynchttpserver, asyncdispatch, urlly, sequtils
+import asynchttpserver, asyncdispatch, urlly
 
 type
   Metric = tuple
