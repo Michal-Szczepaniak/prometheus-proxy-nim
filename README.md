@@ -1,0 +1,1 @@
+Small prometheus proxy that prometheus can scrape and devices/services can push their statistics to. Useful with esp32 going to sleep, waking up, pushing statistics, and going back to sleep as you cannot push statistics directly to prometheus
