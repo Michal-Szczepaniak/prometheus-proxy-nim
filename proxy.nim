@@ -50,7 +50,7 @@ proc cb(req: Request) {.async,gcsafe.} =
 proc main {.async.} =
   var server = newAsyncHttpServer()
 
-  server.listen Port(8081)
+  server.listen Port(9100)
   while true:
     if server.shouldAcceptRequest():
       await server.acceptRequest(cb)
