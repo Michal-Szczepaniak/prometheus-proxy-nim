@@ -19,7 +19,7 @@ func `[]=`*(query: var seq[(string, (string, Metric))], key: string, value: (str
 
 proc getMetrics(hostname: string, metric: Metric): string =
   return "# TYPE " & metric.name & " " & metric.metricType & "\n" &
-    metric.name & "{hostname=\"" & "" & "\" " & metric.value & "\n"
+    metric.name & "{hostname=\"" & hostname & "\"} " & metric.value & "\n"
 
 proc getMetricsSummary(): string =
   var summary: string
