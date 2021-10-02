@@ -2,7 +2,7 @@ import asynchttpserver, asyncdispatch, urlly
 
 type
   Metric = tuple
-    name, value, metricType: string
+    name, value, metricType, client: string
 var metrics: seq[(string, (string, Metric))]
 
 func `[]`*(query: seq[(string, (string, Metric))], key: string): (string, Metric) =
@@ -19,7 +19,7 @@ func `[]=`*(query: var seq[(string, (string, Metric))], key: string, value: (str
 
 proc getMetrics(hostname: string, metric: Metric): string =
   return "# TYPE " & metric.name & " " & metric.metricType & "\n" &
-    metric.name & "{hostname=\"" & hostname & "\"} " & metric.value & "\n"
+    metric.name & "{hostname=\"" & hostname & "\",client=\"" & metric.client & "\"} " & metric.value & "\n"
 
 proc getMetricsSummary(): string =
   var summary: string
@@ -40,8 +40,9 @@ proc cb(req: Request) {.async,gcsafe.} =
         name = query["name"]
         value = query["value"]
         metricType = query["metricType"]
+        client = query["client"]
       if name != "" and value != "" and metricType != "":
-        var metric: Metric = (name: name, value: value, metricType: metricType)
+        var metric: Metric = (name: name, value: value, metricType: metricType, client: client)
         metrics[name] = (req.hostname, metric)
         await req.respond(Http200, "", nil)
       else:
