@@ -56,8 +56,9 @@ proc cb(req: Request) {.async,gcsafe.} =
         client = query["client"]
       if name != "" and value != "" and metricType != "":
         var metric: Metric = (name: name, value: value, metricType: metricType, client: client)
-        let met = metrics[name]
+        var met = metrics[name]
         met[req.hostname] = metric
+        metrics[name] = met
         await req.respond(Http200, "", nil)
       else:
         await req.respond(Http400, "", nil)
