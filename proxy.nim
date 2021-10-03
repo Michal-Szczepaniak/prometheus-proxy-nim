@@ -3,14 +3,26 @@ import asynchttpserver, asyncdispatch, urlly
 type
   Metric = tuple
     name, value, metricType, client: string
-var metrics: seq[(string, (string, Metric))]
+var metrics: seq[(string, seq[(string, Metric)])]
 
-func `[]`*(query: seq[(string, (string, Metric))], key: string): (string, Metric) =
+func `[]`*(query: seq[(string, seq[(string, Metric)])], key: string): seq[(string, Metric)] =
   for (k, v) in query:
     if k == key:
       return v
 
-func `[]=`*(query: var seq[(string, (string, Metric))], key: string, value: (string, Metric)) =
+func `[]`*(query: seq[(string, Metric)], key: string): Metric =
+  for (k, v) in query:
+    if k == key:
+      return v
+
+func `[]=`*(query: var seq[(string, seq[(string, Metric)])], key: string, value: seq[(string, Metric)]) =
+  for pair in query.mitems:
+    if pair[0] == key:
+      pair[1] = value
+      return
+  query.add((key, value))
+
+func `[]=`*(query: var seq[(string, Metric)], key: string, value: Metric) =
   for pair in query.mitems:
     if pair[0] == key:
       pair[1] = value
@@ -24,7 +36,8 @@ proc getMetrics(hostname: string, metric: Metric): string =
 proc getMetricsSummary(): string =
   var summary: string
   for (name, value) in metrics:
-    summary &= getMetrics(value[0], value[1])
+    for (hostname, metric) in value:
+      summary &= getMetrics(hostname, metric)
   return summary
 
 proc cb(req: Request) {.async,gcsafe.} =
@@ -43,7 +56,8 @@ proc cb(req: Request) {.async,gcsafe.} =
         client = query["client"]
       if name != "" and value != "" and metricType != "":
         var metric: Metric = (name: name, value: value, metricType: metricType, client: client)
-        metrics[name] = (req.hostname, metric)
+        let met = metrics[name]
+        met[req.hostname] = metric
         await req.respond(Http200, "", nil)
       else:
         await req.respond(Http400, "", nil)
